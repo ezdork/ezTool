@@ -36,18 +36,17 @@ public final class DbServlet extends HttpServlet {
 		Map<String, Object> result = new HashMap<String, Object>();
 		result.put("msg", "");
 
-		if (sqls == null) {
-			return;
-		}
-		for (String sql : sqls.split(";")) {
-			if ("".equals(sql.trim())) {
-				continue;
-			}
+		if (sqls != null) {
+			for (String sql : sqls.split(";")) {
+				if ("".equals(sql.trim())) {
+					continue;
+				}
 
-			if (sql.matches("(?i)(?s).*(insert|update|delete|drop|create).*")) {
-				executeBatch(sql, result);
-			} else {
-				executeQuery(sql, result);
+				if (sql.matches("(?i)(?s).*(insert|update|delete|drop|create).*")) {
+					executeBatch(sql, result);
+				} else {
+					executeQuery(sql, result);
+				}
 			}
 		}
 

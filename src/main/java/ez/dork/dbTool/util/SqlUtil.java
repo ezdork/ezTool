@@ -1,7 +1,6 @@
 package ez.dork.dbTool.util;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -12,8 +11,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import ez.dork.dbTool.database.Database;
+
 public class SqlUtil {
 
+	private static Database database = new Database();
+	
 	public static int executeUpdate(String sql) throws Exception {
 
 		int updatecount = 0;
@@ -22,7 +25,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = getConnection();
+			conn = database.getConnection();
 			stmt = conn.createStatement();
 			updatecount = stmt.executeUpdate(sql);
 		} finally {
@@ -40,7 +43,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = getConnection();
+			conn = database.getConnection();
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
 			result = toListOfMaps(rs);
@@ -59,7 +62,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = getConnection();
+			conn = database.getConnection();
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
 			result = toEditablegrid(rs);
@@ -68,16 +71,6 @@ public class SqlUtil {
 		}
 
 		return result;
-	}
-
-	private static Connection getConnection() throws ClassNotFoundException, SQLException {
-
-		Class.forName("org.postgresql.Driver");
-		String url = "jdbc:postgresql://localhost:5432/stock_smart";
-		String user = "postgres";
-		String password = "Pass@w0rd";
-
-		return DriverManager.getConnection(url, user, password);
 	}
 
 	private static Map<String, Object> toEditablegrid(ResultSet rs) throws SQLException {
@@ -137,7 +130,7 @@ public class SqlUtil {
 		return rows;
 	}
 
-	private static void close(Connection conn, Statement stmt, ResultSet rs) {
+	public static void close(Connection conn, Statement stmt, ResultSet rs) {
 		if (rs != null) {
 			try {
 				rs.close();

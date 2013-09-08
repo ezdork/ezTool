@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Basic CRUD Application - jQuery EasyUI CRUD Demo</title>
+<title>ezTool - dbTool</title>
 <link rel="stylesheet" type="text/css" href="themes/default/easyui.css">
 <link rel="stylesheet" type="text/css" href="themes/icon.css">
 <link rel="stylesheet" type="text/css" href="demo.css">
@@ -14,7 +14,34 @@
 <body class="easyui-layout" onkeydown="check();" onkeyup="javascript:isA = false;">
 
 
-	<div data-options="region:'west',title:'db view',split:true" style="width: 200px;"></div>
+	<div data-options="region:'west',title:'db view',split:true" style="width: 200px;">
+		<table id="tt" title="Folder Browser" class="easyui-treegrid" style="width: 700px; height: 250px"
+			data-options="
+                url: 'treegrid_data1.json',
+                method: 'get',
+                rownumbers: true,
+                idField: 'id',
+                treeField: 'table_catalog',
+                fit: true
+            ">
+			<thead>
+				<tr>
+					<th data-options="field:'table_catalog'">table_catalog</th>
+					<th data-options="field:'size'" align="right">Size</th>
+					<th data-options="field:'date'">Modified Date</th>
+				</tr>
+			</thead>
+		</table>
+		<script>
+			function formatDollar(value) {
+				if (value) {
+					return '$' + value;
+				} else {
+					return '';
+				}
+			}
+		</script>
+	</div>
 	<div data-options="region:'center'" style="background: #eee;">
 		<div class="easyui-layout" data-options="fit:true">
 			<div data-options="region:'north',title:'excute sql ( ctrl + enter )',split:true" style="height: 200px;">
@@ -107,6 +134,17 @@ select * from stock;
 		}
 
 		$(function() {
+			$('#tt').treegrid({
+				onDblClickRow : function(field,row) {
+					$('#tt').treegrid('append',{
+						parent: 1,  // the node has a 'id' value that defined through 'idField' property
+						data: [{
+							id: '073',
+							table_catalog: 'name73'
+						}]
+					});
+				}
+			});
 			$('#dg').edatagrid({
 				title : '列表',
 				height : 'auto',
