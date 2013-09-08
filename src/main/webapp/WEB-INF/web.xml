@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+	version="2.4">
+
+	<display-name>HelloWorld Application</display-name>
+	<description>
+		This is a simple web application with a source code organization
+		based on the recommendations of the Application Developer's Guide.
+	</description>
+
+	<servlet>
+		<servlet-name>DbServlet</servlet-name>
+		<servlet-class>ez.dork.dbTool.servlet.DbServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>DbServlet</servlet-name>
+		<url-pattern>/dbServlet</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+</web-app>   

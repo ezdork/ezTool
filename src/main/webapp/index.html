@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Basic CRUD Application - jQuery EasyUI CRUD Demo</title>
+<link rel="stylesheet" type="text/css" href="themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="themes/icon.css">
+<link rel="stylesheet" type="text/css" href="demo.css">
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="jquery.easyui.min.js"></script>
+<script type="text/javascript" src="jquery.edatagrid.js"></script>
+</head>
+<body class="easyui-layout" onkeydown="check();" onkeyup="javascript:isA = false;">
+
+
+	<div data-options="region:'west',title:'db view',split:true" style="width: 200px;"></div>
+	<div data-options="region:'center'" style="background: #eee;">
+		<div class="easyui-layout" data-options="fit:true">
+			<div data-options="region:'north',title:'excute sql ( ctrl + enter )',split:true" style="height: 200px;">
+				<textarea id="sql" style="width: 100%; height: 100%">
+insert into stock (a1,a2,a3) values (1,2,3);
+select * from stock;
+				</textarea>
+			</div>
+			<div data-options="region:'center'" style="background: #eee;">
+				<table id="dg" data-options="rownumbers:true,singleSelect:true,pageList:[5,10,20,50,100]"></table>
+			</div>
+			<div data-options="region:'south',title:'console',split:true" style="height: 200px;">
+				<div id="msg"></div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function query(sql) {
+			$.post('dbServlet', {
+				sql : sql
+			}, function(data) {
+				var json = JSON.parse(data);
+				$('#msg').html(json.msg);
+				if (json.result) {
+					$('#dg').edatagrid({
+						columns : json.result.columns,
+						data : json.result.data
+					});
+				}
+			});
+		}
+
+		function getSelectedText() {
+			var result = '';
+			if (window.getSelection) { // all browsers, except IE before version 9
+				var range = window.getSelection();
+				result = range.toString();
+			} else {
+				if (document.selection.createRange) { // Internet Explorer
+					var range = document.selection.createRange();
+					result = range.text;
+				}
+			}
+			return result;
+		}
+
+		var isA = false;
+		function check() {
+			//$('#message').html(event.keyCode);
+			if (event.keyCode == 17)
+				isA = true;
+			if (isA && event.keyCode == 13) {
+				if (getSelectedText().length > 0) {
+					query(getSelectedText());
+				} else {
+					query($('#sql').val());
+				}
+			}
+		}
+
+		function pagerFilter(data) {
+			if (typeof data.length == 'number' && typeof data.splice == 'function') { // is array
+				data = {
+					total : data.length,
+					rows : data
+				}
+			}
+			var dg = $(this);
+			var opts = dg.datagrid('options');
+			var pager = dg.datagrid('getPager');
+			pager.pagination({
+				onSelectPage : function(pageNum, pageSize) {
+					opts.pageNumber = pageNum;
+					opts.pageSize = pageSize;
+					pager.pagination('refresh', {
+						pageNumber : pageNum,
+						pageSize : pageSize
+					});
+					dg.datagrid('loadData', data);
+				}
+			});
+			if (!data.originalRows) {
+				data.originalRows = (data.rows);
+			}
+			var start = (opts.pageNumber - 1) * parseInt(opts.pageSize);
+			var end = start + parseInt(opts.pageSize);
+			data.rows = (data.originalRows.slice(start, end));
+			return data;
+		}
+
+		$(function() {
+			$('#dg').edatagrid({
+				title : '列表',
+				height : 'auto',
+				collapsible : true, //是否可折叠的  
+				fit : true, //自动大小  
+				pagination : true, //分页控件  
+				editing : true,
+				loadFilter : pagerFilter,
+				toolbar : [ {
+					text : '新增',
+					iconCls : 'icon-add',
+					handler : function() {
+						$('#dg').edatagrid('addRow', 0);
+					}
+				}, '-', {
+					text : '儲存',
+					iconCls : 'icon-save',
+					handler : function() {
+
+						console.log($('#dg').edatagrid('getSelections'));
+						$('#dg').edatagrid('saveRow');
+					}
+				}, '-', {
+					text : '删除',
+					iconCls : 'icon-remove',
+					handler : function() {
+						$('#dg').edatagrid('destroyRow');
+					}
+				} ]
+			});
+		});
+	</script>
+</body>
+</html>
