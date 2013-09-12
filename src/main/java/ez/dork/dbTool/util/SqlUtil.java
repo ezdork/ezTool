@@ -16,7 +16,7 @@ import ez.dork.dbTool.database.Database;
 public class SqlUtil {
 
 	private static Database database = new Database();
-	
+
 	public static int executeUpdate(String sql) throws Exception {
 
 		int updatecount = 0;
@@ -33,6 +33,63 @@ public class SqlUtil {
 		}
 
 		return updatecount;
+	}
+
+	public static List<Map<String, Object>> getDatabaseList() throws Exception {
+
+		List<Map<String, Object>> result = null;
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			conn = database.getConnection();
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(database.getListOfDatabaseSql());
+			result = toListOfMaps(rs);
+		} finally {
+			close(conn, stmt, rs);
+		}
+
+		return result;
+	}
+	
+	public static List<Map<String, Object>> getTableList(String table_catalog) throws Exception {
+
+		List<Map<String, Object>> result = null;
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			conn = database.getConnection();
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(database.getListOfTablesSql(table_catalog));
+			result = toListOfMaps(rs);
+		} finally {
+			close(conn, stmt, rs);
+		}
+
+		return result;
+	}
+
+	public static List<Map<String, Object>> getColumnList(String tableCatalog, String tableName) throws Exception {
+
+		List<Map<String, Object>> result = null;
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			conn = database.getConnection();
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(database.getListOfColumnsSql(tableCatalog, tableName));
+			result = toListOfMaps(rs);
+		} finally {
+			close(conn, stmt, rs);
+		}
+
+		return result;
 	}
 
 	public static List<Map<String, Object>> query(String sql) throws Exception {

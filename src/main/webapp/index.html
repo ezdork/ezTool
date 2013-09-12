@@ -15,32 +15,14 @@
 
 
 	<div data-options="region:'west',title:'db view',split:true" style="width: 200px;">
-		<table id="tt" title="Folder Browser" class="easyui-treegrid" style="width: 700px; height: 250px"
-			data-options="
-                url: 'treegrid_data1.json',
-                method: 'get',
-                rownumbers: true,
-                idField: 'id',
-                treeField: 'table_catalog',
-                fit: true
-            ">
+		<table id="tt" class="easyui-treegrid" style="width: 700px; height: 250px" url="treeViewServlet" rownumbers="true" idField="id" treeField="view_column" collapsible="true" fit="true">
 			<thead>
 				<tr>
-					<th data-options="field:'table_catalog'">table_catalog</th>
-					<th data-options="field:'size'" align="right">Size</th>
-					<th data-options="field:'date'">Modified Date</th>
+					<th data-options="field:'view_column'">view_column</th>
+					<th data-options="field:'table_name'">table_name</th>
 				</tr>
 			</thead>
 		</table>
-		<script>
-			function formatDollar(value) {
-				if (value) {
-					return '$' + value;
-				} else {
-					return '';
-				}
-			}
-		</script>
 	</div>
 	<div data-options="region:'center'" style="background: #eee;">
 		<div class="easyui-layout" data-options="fit:true">
@@ -61,7 +43,7 @@ select * from stock;
 
 	<script>
 		function query(sql) {
-			$.post('dbServlet', {
+			$.post('gridViewServlet', {
 				sql : sql
 			}, function(data) {
 				var json = JSON.parse(data);
@@ -133,15 +115,52 @@ select * from stock;
 			return data;
 		}
 
+		var maxId = 0;
+		function getMaxId(datas) {
+			if (!datas)
+				datas = $('#tt').treegrid('getRoots');
+
+			for ( var i in datas) {
+				var data = datas[i];
+				var currentId = parseInt(data.id, 10);
+				maxId = (maxId > currentId ? maxId : currentId);
+				if (data.children) {
+					getMaxId(data.children);
+				}
+			}
+			return maxId + 1;
+		}
+
 		$(function() {
 			$('#tt').treegrid({
-				onDblClickRow : function(field,row) {
-					$('#tt').treegrid('append',{
-						parent: 1,  // the node has a 'id' value that defined through 'idField' property
-						data: [{
-							id: '073',
-							table_catalog: 'name73'
-						}]
+				onDblClickRow : function(row) {
+					if($('#tt').treegrid('getChildren', row.id).length > 0){
+						return;
+					}
+					var options = {};
+					if (row.iconCls == 'database') {
+						options.tableCatalog = row.view_column;
+					} else if (row.iconCls == 'table') {
+						options.tableName = row.view_column;
+						var parentRow = $('#tt').treegrid('getParent', row.id);
+						options.tableCatalog = parentRow.view_column;
+					} else if (row.iconCls == 'column') {
+						// query('select * from ' + row.view_column);
+						return;
+					}
+					$.post('treeViewServlet', options, function(data) {
+						var data_list = JSON.parse(data);
+						if (data_list) {
+							var tmp_max_id = getMaxId();
+							for ( var i in data_list) {
+								data_list[i].id = tmp_max_id;
+								tmp_max_id++;
+							}
+							$('#tt').treegrid('append', {
+								parent : row.id, // the node has a 'id' value that defined through 'idField' property
+								data : data_list
+							});
+						}
 					});
 				}
 			});

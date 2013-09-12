@@ -16,12 +16,18 @@ public class Database {
 		return DriverManager.getConnection(url, user, password);
 	}
 
-	public String getListOfTablesSql() {
-		return "SELECT table_catalog, table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' ORDER BY table_type, table_name;";
+	public String getListOfDatabaseSql() {
+		return "SELECT table_catalog as view_column FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' GROUP BY table_catalog;";
 	}
 
-	public String getListOfColumnsSql(String table_catalog, String tableName) {
-		return String.format("SELECT * FROM information_schema.columns where table_catalog = '%s' AND table_schema = 'public' and table_name = '%s';", table_catalog, tableName);
+	public String getListOfTablesSql(String table_catalog) {
+		return String
+				.format("SELECT table_name as view_column FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' AND table_catalog = '%s' ORDER BY table_type, table_name;",
+						table_catalog);
+	}
+
+	public String getListOfColumnsSql(String tableCatalog, String tableName) {
+		return String.format("SELECT column_name as view_column FROM information_schema.columns where table_catalog = '%s' AND table_schema = 'public' and table_name = '%s';", tableCatalog, tableName);
 	}
 
 }

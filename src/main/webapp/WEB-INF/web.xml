@@ -11,14 +11,26 @@
 	</description>
 
 	<servlet>
-		<servlet-name>DbServlet</servlet-name>
-		<servlet-class>ez.dork.dbTool.servlet.DbServlet</servlet-class>
+		<servlet-name>GridViewServlet</servlet-name>
+		<servlet-class>ez.dork.dbTool.servlet.GridViewServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>DbServlet</servlet-name>
-		<url-pattern>/dbServlet</url-pattern>
+		<servlet-name>GridViewServlet</servlet-name>
+		<url-pattern>/gridViewServlet</url-pattern>
 	</servlet-mapping>
+
+
+	<servlet>
+		<servlet-name>TreeViewServlet</servlet-name>
+		<servlet-class>ez.dork.dbTool.servlet.TreeViewServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>TreeViewServlet</servlet-name>
+		<url-pattern>/treeViewServlet</url-pattern>
+	</servlet-mapping>
+
 
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
