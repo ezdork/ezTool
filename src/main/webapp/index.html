@@ -138,13 +138,13 @@ select * from stock;
 						return;
 					}
 					var options = {};
-					if (row.iconCls == 'database') {
+					if (row.iconCls == 'icon-database') {
 						options.tableCatalog = row.view_column;
-					} else if (row.iconCls == 'table') {
+					} else if (row.iconCls == 'icon-table') {
 						options.tableName = row.view_column;
 						var parentRow = $('#tt').treegrid('getParent', row.id);
 						options.tableCatalog = parentRow.view_column;
-					} else if (row.iconCls == 'column') {
+					} else if (row.iconCls == 'icon-column') {
 						// query('select * from ' + row.view_column);
 						return;
 					}

@@ -57,7 +57,7 @@ public final class TreeViewServlet extends HttpServlet {
 			int i = 1;
 			for (Map<String, Object> d : data) {
 				d.put("id", i++);
-				d.put("iconCls", "database");
+				d.put("iconCls", "icon-database");
 			}
 			result.addAll(data);
 		} catch (Exception e) {
@@ -69,7 +69,7 @@ public final class TreeViewServlet extends HttpServlet {
 		try {
 			List<Map<String, Object>> data = SqlUtil.getTableList(table_catalog);
 			for (Map<String, Object> d : data) {
-				d.put("iconCls", "table");
+				d.put("iconCls", "icon-table");
 			}
 			result.addAll(data);
 		} catch (Exception e) {
@@ -81,7 +81,7 @@ public final class TreeViewServlet extends HttpServlet {
 		try {
 			List<Map<String, Object>> data = SqlUtil.getColumnList(tableCatalog, tableName);
 			for (Map<String, Object> d : data) {
-				d.put("iconCls", "column");
+				d.put("iconCls", "icon-column");
 			}
 			result.addAll(data);
 			
