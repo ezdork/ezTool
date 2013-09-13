@@ -14,14 +14,14 @@
 <body class="easyui-layout" onkeydown="check();" onkeyup="javascript:isA = false;">
 
 
-	<div data-options="region:'west',title:'db view',split:true" style="width: 200px;">
-		<table id="tt" class="easyui-treegrid" style="width: 700px; height: 250px" url="treeViewServlet" rownumbers="true" idField="id" treeField="view_column" collapsible="true" fit="true">
+	<div data-options="region:'west',title:'db view',split:true" style="width: 350px;">
+		<table id="tt" class="easyui-treegrid" url="treeViewServlet" idField="id" treeField="view_column" collapsible="true" fit="true">
 			<thead>
 				<tr>
 					<th data-options="field:'view_column'">VIEW_COLUMN</th>
 					<th data-options="field:'relation'">PK/FK</th>
-					<th data-options="field:'TYPE_NAME'">TYPE</th>
-					<th data-options="field:'COLUMN_SIZE'">SIZE</th>
+					<th data-options="field:'type_name'">TYPE</th>
+					<th data-options="field:'column_size'">SIZE</th>
 				</tr>
 			</thead>
 		</table>
@@ -30,8 +30,7 @@
 		<div class="easyui-layout" data-options="fit:true">
 			<div data-options="region:'north',title:'excute sql ( ctrl + enter )',split:true" style="height: 200px;">
 				<textarea id="sql" style="width: 100%; height: 100%">
-insert into stock (a1,a2,a3) values (1,2,3);
-select * from stock;
+select * from table;
 				</textarea>
 			</div>
 			<div data-options="region:'center'" style="background: #eee;">
@@ -133,14 +132,7 @@ select * from stock;
 			return maxId + 1;
 		}
 
-		var relationList = [];
-
 		$(function() {
-			$.post('treeViewServlet', {
-				getRelation : true
-			}, function(data) {
-				relationList = JSON.parse(data);
-			});
 			$('#tt').treegrid({
 				onDblClickRow : function(row) {
 					if ($('#tt').treegrid('getChildren', row.id).length > 0) {
@@ -150,11 +142,12 @@ select * from stock;
 					if (row.iconCls == 'icon-database') {
 						options.tableCatalog = row.view_column;
 					} else if (row.iconCls == 'icon-table') {
+// 						query('select * from ' + row.view_column);
+						
 						options.tableName = row.view_column;
 						var parentRow = $('#tt').treegrid('getParent', row.id);
 						options.tableCatalog = parentRow.view_column;
 					} else if (row.iconCls == 'icon-column') {
-						// query('select * from ' + row.view_column);
 						return;
 					}
 					$.post('treeViewServlet', options, function(data) {
@@ -165,22 +158,6 @@ select * from stock;
 								var data = data_list[i];
 								data.id = tmp_max_id;
 								tmp_max_id++;
-								
-								if (row.iconCls == 'icon-table') {
-									
-									for ( var i in relationList) {
-										var obj = relationList[i];
-										if (row.view_column == obj.pktable_name){
-											if(data['COLUMN_NAME'] == obj.pkcolumn_name)
-												data['relation'] = 'PK'
-										} 
-
-										if (row.view_column == obj.fktable_name){
-											if(data['COLUMN_NAME'] == obj.fkcolumn_name)
-												data['relation'] = 'FK'
-										}
-									}
-								}
 							}
 
 							$('#tt').treegrid('append', {

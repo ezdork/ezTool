@@ -62,3 +62,10 @@
 .icon-mini-refresh{
 	background:url('icons/mini_refresh.png') no-repeat center center;
 }
+
+.icon-database{
+	background:url('icons/database.png') no-repeat center center;
+}
+.icon-table{
+	background:url('icons/table.png') no-repeat center center;
+}

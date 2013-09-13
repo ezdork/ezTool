@@ -25,10 +25,16 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<!-- database dependency -->
 		<dependency>
 			<groupId>postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>9.1-901.jdbc4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.informix</groupId>
+			<artifactId>ifxjdbc</artifactId>
+			<version>4.10.JC1DE</version>
 		</dependency>
 
 		<dependency>

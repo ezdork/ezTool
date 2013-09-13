@@ -16,222 +16,254 @@ import ez.dork.dbTool.database.Database;
 
 public class SqlUtil {
 
-	private static Database database = new Database();
+    private static Database database = new Database();
 
-	public static int executeUpdate(String sql) throws Exception {
+    public static int executeUpdate(String sql) throws Exception {
 
-		int updatecount = 0;
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
+	int updatecount = 0;
+	Connection conn = null;
+	Statement stmt = null;
+	ResultSet rs = null;
 
-		try {
-			conn = database.getConnection();
-			stmt = conn.createStatement();
-			updatecount = stmt.executeUpdate(sql);
-		} finally {
-			close(conn, stmt, rs);
-		}
-
-		return updatecount;
+	try {
+	    conn = database.getConnection();
+	    stmt = conn.createStatement();
+	    updatecount = stmt.executeUpdate(sql);
+	} finally {
+	    close(conn, stmt, rs);
 	}
 
+	return updatecount;
+    }
 
-	public static List<Map<String, Object>> getRelationList() throws Exception {
+    public static List<Map<String, Object>> getRelationList() throws Exception {
 
-		List<Map<String, Object>> result = null;
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
+	List<Map<String, Object>> result = null;
+	Connection conn = null;
+	Statement stmt = null;
+	ResultSet rs = null;
 
-		try {
-			conn = database.getConnection();
+	try {
+	    conn = database.getConnection();
 
-			DatabaseMetaData databaseMetaData = conn.getMetaData();
-			rs = databaseMetaData.getExportedKeys(null, null, null);
-			result = toListOfMaps(rs);
+	    DatabaseMetaData databaseMetaData = conn.getMetaData();
+	    rs = databaseMetaData.getExportedKeys(null, null, null);
+	    result = toListOfMaps(rs);
 
-		} finally {
-			close(conn, stmt, rs);
-		}
-
-		return result;
+	} finally {
+	    close(conn, stmt, rs);
 	}
 
-	
-	public static List<Map<String, Object>> getDatabaseList() throws Exception {
+	return result;
+    }
 
-		List<Map<String, Object>> result = null;
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
+    public static List<Map<String, Object>> getDatabaseList() throws Exception {
 
-		try {
-			conn = database.getConnection();
-			DatabaseMetaData databaseMetaData = conn.getMetaData();
-			rs = databaseMetaData.getCatalogs();
-			result = toListOfMaps(rs);
-		} finally {
-			close(conn, stmt, rs);
-		}
+	List<Map<String, Object>> result = null;
+	Connection conn = null;
+	Statement stmt = null;
+	ResultSet rs = null;
 
-		return result;
+	try {
+	    conn = database.getConnection();
+	    DatabaseMetaData databaseMetaData = conn.getMetaData();
+	    rs = databaseMetaData.getCatalogs();
+	    result = toListOfMaps(rs);
+	} finally {
+	    close(conn, stmt, rs);
 	}
 
-	public static List<Map<String, Object>> getTableList(String table_catalog) throws Exception {
+	return result;
+    }
 
-		List<Map<String, Object>> result = null;
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
+    public static List<Map<String, Object>> getTableList(String table_catalog) throws Exception {
 
-		try {
-			conn = database.getConnection();
-			DatabaseMetaData databaseMetaData = conn.getMetaData();
-			String[] types = { "TABLE" };
-			rs = databaseMetaData.getTables(table_catalog, null, "%", types);
-			result = toListOfMaps(rs);
-		} finally {
-			close(conn, stmt, rs);
-		}
+	List<Map<String, Object>> result = null;
+	Connection conn = null;
+	Statement stmt = null;
+	ResultSet rs = null;
 
-		return result;
+	try {
+	    conn = database.getConnection();
+	    DatabaseMetaData databaseMetaData = conn.getMetaData();
+	    String[] types = { "TABLE" };
+	    rs = databaseMetaData.getTables(table_catalog, null, "%", types);
+	    result = toListOfMaps(rs);
+	} finally {
+	    close(conn, stmt, rs);
 	}
 
-	public static List<Map<String, Object>> getColumnList(String tableCatalog, String tableName) throws Exception {
+	return result;
+    }
 
-		List<Map<String, Object>> result = null;
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
+    public static List<Map<String, Object>> getColumnList(String tableCatalog, String tableName) throws Exception {
 
-		try {
-			conn = database.getConnection();
+	List<Map<String, Object>> result = null;
+	Connection conn = null;
+	Statement stmt = null;
+	ResultSet rs = null;
 
-			DatabaseMetaData databaseMetaData = conn.getMetaData();
-			rs = databaseMetaData.getColumns(tableCatalog, null, tableName, null);
-			result = toListOfMaps(rs);
+	try {
+	    conn = database.getConnection();
 
-		} finally {
-			close(conn, stmt, rs);
+	    DatabaseMetaData databaseMetaData = conn.getMetaData();
+	    rs = databaseMetaData.getColumns(tableCatalog, null, tableName, null);
+	    result = toListOfMaps(rs);
+	    // for (Map<String, Object> resultMap : result) {
+	    // System.out.println(resultMap);
+	    // }
+
+	    rs = databaseMetaData.getPrimaryKeys(null, null, tableName);
+	    List<Map<String, Object>> primaryKeyList = toListOfMaps(rs);
+	    for (Map<String, Object> primaryKeyMap : primaryKeyList) {
+		String columnName = (String) primaryKeyMap.get("column_name");
+		for (Map<String, Object> map : result) {
+		    if (columnName.equals(map.get("column_name"))) {
+			map.put("relation", "PK");
+		    }
 		}
+	    }
 
-		return result;
+	    rs = databaseMetaData.getExportedKeys(null, null, tableName);
+	    List<Map<String, Object>> relationList = toListOfMaps(rs);
+
+	    for (Map<String, Object> relationMap : relationList) {
+		String pktable_name = (String) relationMap.get("pktable_name");
+		String pkcolumn_name = (String) relationMap.get("pkcolumn_name");
+		String fktable_name = (String) relationMap.get("fktable_name");
+		String fkcolumn_name = (String) relationMap.get("fkcolumn_name");
+		for (Map<String, Object> resultMap : result) {
+		    String table_name = (String) resultMap.get("table_name");
+		    String column_name = (String) resultMap.get("column_name");
+		    if (pktable_name.equalsIgnoreCase(table_name) && pkcolumn_name.equalsIgnoreCase(column_name)) {
+			resultMap.put("relation", "PK");
+		    }
+		    if (fktable_name.equalsIgnoreCase(table_name) && fkcolumn_name.equalsIgnoreCase(column_name)) {
+			resultMap.put("relation", "FK");
+		    }
+		}
+	    }
+
+	} finally {
+	    close(conn, stmt, rs);
 	}
 
-	public static List<Map<String, Object>> query(String sql) throws Exception {
+	return result;
+    }
 
-		List<Map<String, Object>> result = null;
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
+    public static List<Map<String, Object>> query(String sql) throws Exception {
 
-		try {
-			conn = database.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(sql);
-			result = toListOfMaps(rs);
-		} finally {
-			close(conn, stmt, rs);
-		}
+	List<Map<String, Object>> result = null;
+	Connection conn = null;
+	Statement stmt = null;
+	ResultSet rs = null;
 
-		return result;
+	try {
+	    conn = database.getConnection();
+	    stmt = conn.createStatement();
+	    rs = stmt.executeQuery(sql);
+	    result = toListOfMaps(rs);
+	} finally {
+	    close(conn, stmt, rs);
 	}
 
-	public static Map<String, Object> queryToEditablegrid(String sql) throws Exception {
+	return result;
+    }
 
-		Map<String, Object> result = new HashMap<String, Object>();
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet rs = null;
+    public static Map<String, Object> queryToEditablegrid(String sql) throws Exception {
 
-		try {
-			conn = database.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(sql);
-			result = toEditablegrid(rs);
-		} finally {
-			close(conn, stmt, rs);
-		}
+	Map<String, Object> result = new HashMap<String, Object>();
+	Connection conn = null;
+	Statement stmt = null;
+	ResultSet rs = null;
 
-		return result;
+	try {
+	    conn = database.getConnection();
+	    stmt = conn.createStatement();
+	    rs = stmt.executeQuery(sql);
+	    result = toEditablegrid(rs);
+	} finally {
+	    close(conn, stmt, rs);
 	}
 
-	private static Map<String, Object> toEditablegrid(ResultSet rs) throws SQLException {
-		Map<String, Object> result = new LinkedHashMap<String, Object>();
+	return result;
+    }
 
-		List<Map<String, Object>> metadata = new ArrayList<Map<String, Object>>();
-		List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
-		ResultSetMetaData metaData = rs.getMetaData();
-		int columnCount = metaData.getColumnCount();
+    private static Map<String, Object> toEditablegrid(ResultSet rs) throws SQLException {
+	Map<String, Object> result = new LinkedHashMap<String, Object>();
 
-		int j = 1;
-		while (rs.next()) {
+	List<Map<String, Object>> metadata = new ArrayList<Map<String, Object>>();
+	List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
+	ResultSetMetaData metaData = rs.getMetaData();
+	int columnCount = metaData.getColumnCount();
 
-			Map<String, Object> columns = new LinkedHashMap<String, Object>();
-			for (int i = 1; i <= columnCount; i++) {
-				String columnLabel = metaData.getColumnLabel(i);
-				if (j == 1) {
-					Map<String, Object> meta = new LinkedHashMap<String, Object>();
-					meta.put("field", columnLabel);
-					meta.put("title", columnLabel.toUpperCase());
+	int j = 1;
+	while (rs.next()) {
 
-					// meta.put("type", metaData.getColumnTypeName(i));
-					meta.put("editor", "text");
-					meta.put("resizable", true);
-					meta.put("sortable", true);
-					metadata.add(meta);
-				}
+	    Map<String, Object> columns = new LinkedHashMap<String, Object>();
+	    for (int i = 1; i <= columnCount; i++) {
+		String columnLabel = metaData.getColumnLabel(i);
+		if (j == 1) {
+		    Map<String, Object> meta = new LinkedHashMap<String, Object>();
+		    meta.put("field", columnLabel);
+		    meta.put("title", columnLabel.toUpperCase());
 
-				columns.put(columnLabel, rs.getObject(i));
-			}
-
-			data.add(columns);
-			j++;
+		    // meta.put("type", metaData.getColumnTypeName(i));
+		    meta.put("editor", "text");
+		    meta.put("resizable", true);
+		    meta.put("sortable", true);
+		    metadata.add(meta);
 		}
-		List<List<?>> list = new ArrayList<List<?>>();
-		list.add(metadata);
 
-		result.put("columns", list);
-		result.put("data", data);
-		return result;
+		columns.put(columnLabel, rs.getObject(i));
+	    }
+
+	    data.add(columns);
+	    j++;
 	}
+	List<List<?>> list = new ArrayList<List<?>>();
+	list.add(metadata);
 
-	private static List<Map<String, Object>> toListOfMaps(ResultSet rs) throws SQLException {
-		List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
-		ResultSetMetaData metaData = rs.getMetaData();
-		int columnCount = metaData.getColumnCount();
+	result.put("columns", list);
+	result.put("data", data);
+	return result;
+    }
 
-		while (rs.next()) {
-			Map<String, Object> columns = new LinkedHashMap<String, Object>();
+    private static List<Map<String, Object>> toListOfMaps(ResultSet rs) throws SQLException {
+	List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+	ResultSetMetaData metaData = rs.getMetaData();
+	int columnCount = metaData.getColumnCount();
 
-			for (int i = 1; i <= columnCount; i++) {
-				columns.put(metaData.getColumnLabel(i), rs.getObject(i));
-			}
+	while (rs.next()) {
+	    Map<String, Object> columns = new LinkedHashMap<String, Object>();
 
-			rows.add(columns);
-		}
-		return rows;
+	    for (int i = 1; i <= columnCount; i++) {
+		columns.put(metaData.getColumnLabel(i).toLowerCase(), rs.getObject(i));
+	    }
+
+	    rows.add(columns);
 	}
+	return rows;
+    }
 
-	public static void close(Connection conn, Statement stmt, ResultSet rs) {
-		if (rs != null) {
-			try {
-				rs.close();
-			} catch (Exception e) {
-			}
-		}
-		if (stmt != null) {
-			try {
-				stmt.close();
-			} catch (Exception e) {
-			}
-		}
-		if (conn != null) {
-			try {
-				conn.close();
-			} catch (Exception e) {
-			}
-		}
+    public static void close(Connection conn, Statement stmt, ResultSet rs) {
+	if (rs != null) {
+	    try {
+		rs.close();
+	    } catch (Exception e) {
+	    }
 	}
+	if (stmt != null) {
+	    try {
+		stmt.close();
+	    } catch (Exception e) {
+	    }
+	}
+	if (conn != null) {
+	    try {
+		conn.close();
+	    } catch (Exception e) {
+	    }
+	}
+    }
 }
