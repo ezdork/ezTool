@@ -18,8 +18,10 @@
 		<table id="tt" class="easyui-treegrid" style="width: 700px; height: 250px" url="treeViewServlet" rownumbers="true" idField="id" treeField="view_column" collapsible="true" fit="true">
 			<thead>
 				<tr>
-					<th data-options="field:'view_column'">view_column</th>
-					<th data-options="field:'table_name'">table_name</th>
+					<th data-options="field:'view_column'">VIEW_COLUMN</th>
+					<th data-options="field:'relation'">PK/FK</th>
+					<th data-options="field:'TYPE_NAME'">TYPE</th>
+					<th data-options="field:'COLUMN_SIZE'">SIZE</th>
 				</tr>
 			</thead>
 		</table>
@@ -131,10 +133,17 @@ select * from stock;
 			return maxId + 1;
 		}
 
+		var relationList = [];
+
 		$(function() {
+			$.post('treeViewServlet', {
+				getRelation : true
+			}, function(data) {
+				relationList = JSON.parse(data);
+			});
 			$('#tt').treegrid({
 				onDblClickRow : function(row) {
-					if($('#tt').treegrid('getChildren', row.id).length > 0){
+					if ($('#tt').treegrid('getChildren', row.id).length > 0) {
 						return;
 					}
 					var options = {};
@@ -153,9 +162,27 @@ select * from stock;
 						if (data_list) {
 							var tmp_max_id = getMaxId();
 							for ( var i in data_list) {
-								data_list[i].id = tmp_max_id;
+								var data = data_list[i];
+								data.id = tmp_max_id;
 								tmp_max_id++;
+								
+								if (row.iconCls == 'icon-table') {
+									
+									for ( var i in relationList) {
+										var obj = relationList[i];
+										if (row.view_column == obj.pktable_name){
+											if(data['COLUMN_NAME'] == obj.pkcolumn_name)
+												data['relation'] = 'PK'
+										} 
+
+										if (row.view_column == obj.fktable_name){
+											if(data['COLUMN_NAME'] == obj.fkcolumn_name)
+												data['relation'] = 'FK'
+										}
+									}
+								}
 							}
+
 							$('#tt').treegrid('append', {
 								parent : row.id, // the node has a 'id' value that defined through 'idField' property
 								data : data_list

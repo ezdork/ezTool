@@ -42,7 +42,7 @@ public final class GridViewServlet extends HttpServlet {
 					continue;
 				}
 
-				if (sql.matches("(?i)(?s).*(insert|update|delete|drop|create).*")) {
+				if (sql.matches("(?i)(?s).*(insert|update|delete|drop|create|alter).*")) {
 					executeBatch(sql, result);
 				} else {
 					executeQuery(sql, result);

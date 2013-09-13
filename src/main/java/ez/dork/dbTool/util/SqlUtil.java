@@ -1,6 +1,7 @@
 package ez.dork.dbTool.util;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -35,6 +36,29 @@ public class SqlUtil {
 		return updatecount;
 	}
 
+
+	public static List<Map<String, Object>> getRelationList() throws Exception {
+
+		List<Map<String, Object>> result = null;
+		Connection conn = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			conn = database.getConnection();
+
+			DatabaseMetaData databaseMetaData = conn.getMetaData();
+			rs = databaseMetaData.getExportedKeys(null, null, null);
+			result = toListOfMaps(rs);
+
+		} finally {
+			close(conn, stmt, rs);
+		}
+
+		return result;
+	}
+
+	
 	public static List<Map<String, Object>> getDatabaseList() throws Exception {
 
 		List<Map<String, Object>> result = null;
@@ -44,8 +68,8 @@ public class SqlUtil {
 
 		try {
 			conn = database.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(database.getListOfDatabaseSql());
+			DatabaseMetaData databaseMetaData = conn.getMetaData();
+			rs = databaseMetaData.getCatalogs();
 			result = toListOfMaps(rs);
 		} finally {
 			close(conn, stmt, rs);
@@ -53,7 +77,7 @@ public class SqlUtil {
 
 		return result;
 	}
-	
+
 	public static List<Map<String, Object>> getTableList(String table_catalog) throws Exception {
 
 		List<Map<String, Object>> result = null;
@@ -63,8 +87,9 @@ public class SqlUtil {
 
 		try {
 			conn = database.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(database.getListOfTablesSql(table_catalog));
+			DatabaseMetaData databaseMetaData = conn.getMetaData();
+			String[] types = { "TABLE" };
+			rs = databaseMetaData.getTables(table_catalog, null, "%", types);
 			result = toListOfMaps(rs);
 		} finally {
 			close(conn, stmt, rs);
@@ -82,9 +107,11 @@ public class SqlUtil {
 
 		try {
 			conn = database.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(database.getListOfColumnsSql(tableCatalog, tableName));
+
+			DatabaseMetaData databaseMetaData = conn.getMetaData();
+			rs = databaseMetaData.getColumns(tableCatalog, null, tableName, null);
 			result = toListOfMaps(rs);
+
 		} finally {
 			close(conn, stmt, rs);
 		}
