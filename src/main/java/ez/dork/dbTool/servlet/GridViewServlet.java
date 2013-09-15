@@ -38,11 +38,12 @@ public final class GridViewServlet extends HttpServlet {
 
 		if (sqls != null) {
 			for (String sql : sqls.split(";")) {
-				if ("".equals(sql.trim())) {
+				sql = sql.trim();
+				if ("".equals(sql)) {
 					continue;
 				}
 
-				if (sql.matches("(?i)(?s).*(insert|update|delete|drop|create|alter).*")) {
+				if (sql.matches("(?i)(?s)(insert |update |delete |drop |create |alter ).*")) {
 					executeBatch(sql, result);
 				} else {
 					executeQuery(sql, result);
