@@ -89,6 +89,11 @@ public class SqlUtil {
 			String[] types = { "TABLE" };
 			rs = databaseMetaData.getTables(table_catalog, null, "%", types);
 			result = toListOfMaps(rs);
+			for (Map<String, Object> resultMap : result) {
+				String sql = String.format("select * from %s", resultMap.get("table_name"));
+				String relation = String.format("<div onclick='query(\"%s\")' class='easyui-linkbutton easyui-tooltip icon-search' title='%s'>&nbsp;</div>", sql, sql);
+				resultMap.put("relation", relation);
+			}
 		} finally {
 			close(conn, stmt, rs);
 		}
@@ -136,7 +141,7 @@ public class SqlUtil {
 					String table_name = (String) resultMap.get("table_name");
 					String column_name = (String) resultMap.get("column_name");
 					if (fktable_name.equalsIgnoreCase(table_name) && fkcolumn_name.equalsIgnoreCase(column_name)) {
-						String relation = String.format("<div href='#' title='%s' class=''easyui-tooltip'>%s</div>", pktable_name + "." + pkcolumn_name, "FK");
+						String relation = String.format("<div title='%s' class='easyui-tooltip'>%s</div>", pktable_name + "." + pkcolumn_name, "FK");
 
 						resultMap.put("relation", relation);
 					}
