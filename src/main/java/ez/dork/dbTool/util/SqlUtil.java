@@ -16,8 +16,6 @@ import ez.dork.dbTool.database.Database;
 
 public class SqlUtil {
 
-	private static Database database = new Database();
-
 	public static int executeUpdate(String sql) throws Exception {
 
 		int updatecount = 0;
@@ -26,7 +24,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = database.getConnection();
+			conn = Database.getConnection();
 			stmt = conn.createStatement();
 			updatecount = stmt.executeUpdate(sql);
 		} finally {
@@ -44,7 +42,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = database.getConnection();
+			conn = Database.getConnection();
 
 			DatabaseMetaData databaseMetaData = conn.getMetaData();
 			rs = databaseMetaData.getExportedKeys(null, null, null);
@@ -65,7 +63,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = database.getConnection();
+			conn = Database.getConnection();
 			DatabaseMetaData databaseMetaData = conn.getMetaData();
 			rs = databaseMetaData.getCatalogs();
 			result = toListOfMaps(rs);
@@ -84,7 +82,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = database.getConnection();
+			conn = Database.getConnection();
 			DatabaseMetaData databaseMetaData = conn.getMetaData();
 			String[] types = { "TABLE" };
 			rs = databaseMetaData.getTables(table_catalog, null, "%", types);
@@ -109,7 +107,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = database.getConnection();
+			conn = Database.getConnection();
 
 			DatabaseMetaData databaseMetaData = conn.getMetaData();
 			rs = databaseMetaData.getColumns(tableCatalog, null, tableName, null);
@@ -163,7 +161,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = database.getConnection();
+			conn = Database.getConnection();
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
 			result = toListOfMaps(rs);
@@ -182,7 +180,7 @@ public class SqlUtil {
 		ResultSet rs = null;
 
 		try {
-			conn = database.getConnection();
+			conn = Database.getConnection();
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
 			result = toEditablegrid(rs);

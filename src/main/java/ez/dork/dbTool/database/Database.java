@@ -6,12 +6,12 @@ import java.sql.SQLException;
 
 public class Database {
 
-	public Connection getConnection() throws ClassNotFoundException, SQLException {
-		return getPostgresqlConnection();
-//		return getInformixConnection();
+	public static Connection getConnection() throws ClassNotFoundException, SQLException {
+//		return getPostgresqlConnection();
+		return getInformixConnection();
 	}
 
-	private Connection getPostgresqlConnection() throws ClassNotFoundException, SQLException {
+	private static Connection getPostgresqlConnection() throws ClassNotFoundException, SQLException {
 		Class.forName("org.postgresql.Driver");
 		String url = "jdbc:postgresql://localhost:5432/stock_smart";
 		String user = "postgres";
@@ -25,7 +25,7 @@ public class Database {
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	private Connection getInformixConnection() throws ClassNotFoundException, SQLException {
+	private static Connection getInformixConnection() throws ClassNotFoundException, SQLException {
 		Class.forName("com.informix.jdbc.IfxDriver");
 		String url = "jdbc:informix-sqli://10.0.3.102:7777/mvdis_drv:INFORMIXSERVER=devinst1;DB_LOCALE=zh_tw.utf8";
 		String user = "informix";
